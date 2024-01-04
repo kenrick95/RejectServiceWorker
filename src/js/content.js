@@ -7,11 +7,14 @@ const RejectServiceWorker = {
   registers: [],
 };
 
-(function() {
+(function () {
   // サービスワーカー登録鍵
   const key = Math.random().toString(32).substring(2);
-  const jsRejectServiceWorkerEnableKey = `
-    navigator.serviceWorker.RejectServiceWorkerKey = '`+key+`';
+  const jsRejectServiceWorkerEnableKey =
+    `
+    navigator.serviceWorker.RejectServiceWorkerKey = '` +
+    key +
+    `';
   `;
   const jsRejectServiceWorkerDisableKey = `
     navigator.serviceWorker.RejectServiceWorkerKey = '.';
@@ -20,7 +23,8 @@ const RejectServiceWorker = {
   // サービスワーカー登録は、サービスワーカー登録鍵を待機する
   // サービスワーカー登録鍵あり時、登録する
   // サービスワーカー登録鍵なし時、登録拒否する
-  const jsRegisterServiceWorker = `
+  const jsRegisterServiceWorker =
+    `
     try {
       ServiceWorkerContainer.prototype.register = (function(register, key) {
         return function(scriptURL, options) {
@@ -47,7 +51,9 @@ const RejectServiceWorker = {
             func();
           });
         };
-      })(ServiceWorkerContainer.prototype.register.bind(navigator.serviceWorker), '`+key+`');
+      })(ServiceWorkerContainer.prototype.register.bind(navigator.serviceWorker), '` +
+    key +
+    `');
     } catch (e) {}
   `;
   // サービスワーカー登録拒否（再度、上書きされる可能性あり）
@@ -87,39 +93,49 @@ const RejectServiceWorker = {
       });
     } catch (e) {}
   `;
-  
+
   // ページ内スクリプトの実行
-  const runPageScript = function(text) {
+  const runPageScript = function (text) {
     var script = document.createElement('script');
     script.textContent = text;
     (document.head || document.documentElement).appendChild(script);
     script.remove();
   };
-  
+
   // サービスワーカー登録監視
-  window.addEventListener('message', function(event) {
-    if (event.source == window && event.data.method == 'RejectServiceWorker.register') {
+  window.addEventListener('message', function (event) {
+    if (
+      event.source == window &&
+      event.data.method == 'RejectServiceWorker.register'
+    ) {
       //console.log(event.data.register.scriptURL);
       RejectServiceWorker.registers.push(event.data.register);
-      
+
       // TODO: 登録通知
     }
   });
   runPageScript(jsRegisterServiceWorker);
-  
+
   // サービスワーカー登録拒否
-  chrome.runtime.sendMessage({
-    method: 'verify',
-    hostname: location.hostname,
-  }, (response) => {
-    if (response.data) {
-      // 許可
-      runPageScript(jsRejectServiceWorkerEnableKey);
-    } else {
-      // 拒否
-      runPageScript(jsRejectServiceWorkerDisableKey + jsRejectServiceWorker + jsUnregisterServiceWorker);
+  chrome.runtime.sendMessage(
+    {
+      method: 'verify',
+      hostname: location.hostname,
+    },
+    (response) => {
+      if (!response.data) {
+        // 許可
+        runPageScript(jsRejectServiceWorkerEnableKey);
+      } else {
+        // 拒否
+        runPageScript(
+          jsRejectServiceWorkerDisableKey +
+            jsRejectServiceWorker +
+            jsUnregisterServiceWorker
+        );
+      }
     }
-  });
+  );
 })();
 
 // 備考

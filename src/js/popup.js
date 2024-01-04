@@ -22,23 +22,23 @@
           hostname: url.hostname,
         }, function (response) {
           if (response.data) {
-            document.getElementById('item_AddWhitelist').addEventListener('click', function() {
+            document.getElementById('item_AddDenylist').addEventListener('click', function() {
               chrome.runtime.sendMessage({
-                method: 'addWhitelist',
+                method: 'addDenylist',
                 hostname: url.hostname
               });
               onComplate();
             });
-            document.getElementById('item_AddWhitelist').hidden = false;
+            document.getElementById('item_AddDenylist').hidden = false;
           } else {
-            document.getElementById('item_RemoveWhitelist').addEventListener('click', function() {
+            document.getElementById('item_RemoveDenylist').addEventListener('click', function() {
               chrome.runtime.sendMessage({
-                method: 'removeWhitelist',
+                method: 'removeDenylist',
                 hostname: url.hostname
               });
               onComplate();
             });
-            document.getElementById('item_RemoveWhitelist').hidden = false;
+            document.getElementById('item_RemoveDenylist').hidden = false;
           }
         });
       }
