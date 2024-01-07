@@ -1,0 +1,12 @@
+{
+  "name": "@kenrick95/dsw",
+  "private": true,
+  "packageManager": "pnpm@8.14.0",
+  "scripts": {
+    "dev": "web-ext run --source-dir ./src/",
+    "lint": "web-ext lint --source-dir ./src/"
+  },
+  "devDependencies": {
+    "web-ext": "^7.9.0"
+  }
+}
